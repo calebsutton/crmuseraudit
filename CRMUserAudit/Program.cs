@@ -1,6 +1,8 @@
 ﻿// System namespaces
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 // XRM namespaces
@@ -54,6 +56,9 @@ namespace CRMUserAudit
 
             [Option("filteruser", Required = false, Default = null, HelpText = "Username to filter.  If not specified, will export all users except SYSTEM")]
             public string FilterUser { get; set; }
+
+            [Option("excludeobjects", Separator = ',', Default = null, Required = false, HelpText = "Logical names of objects to exclude from export.  Separated by commas.")]
+            public IEnumerable<string> ExcludeObjects { get; set; }
         }
 
         static void Main(string[] args)
@@ -69,7 +74,7 @@ namespace CRMUserAudit
                     StringBuilder csv = new StringBuilder();
             
                     // Add header line to top of CSV
-                    String csvHeader = "Action,User,Operation,Related Object,Date"; 
+                    String csvHeader = "Action,User,Operation,Related Object,Object Type,Date"; 
                     csv.AppendLine(csvHeader);
 
                     // Setup CRM connection
@@ -96,11 +101,16 @@ namespace CRMUserAudit
                         // Filter specified user
                         query.Criteria.AddCondition("useridname", ConditionOperator.Equal, options.FilterUser);
                     }
-            
-
-                    // Filter out web user logins
-                    query.Criteria.AddCondition("objecttypecode", ConditionOperator.NotEqual, "sockeye_webuserloginattempt");
-
+                    
+                    if (options.ExcludeObjects.Any())
+                    {
+                        // add filter for excluded objects
+                        foreach (object objecttypecode in options.ExcludeObjects.ToArray())
+                        {
+                            query.Criteria.AddCondition("objecttypecode", ConditionOperator.NotEqual, objecttypecode);
+                        }
+                    }
+                    
                     // Filter by date using Days option, time period between now and X days ago           
                     query.Criteria.AddCondition( "createdon", ConditionOperator.GreaterEqual, (DateTime.Now).AddDays(options.Days));
 
@@ -117,9 +127,10 @@ namespace CRMUserAudit
                         AuditOperation operationName = (AuditOperation)operation.Value; // Get Operation name from optionset using value
                         DateTime createdon = DateTime.Parse(audit["createdon"].ToString()); // get createdon date and cast from string to datetime
                         EntityReference objectid = (EntityReference)audit["objectid"]; // Get operation target entity reference from objectid
+                        String objecttype = (String)audit["objecttypecode"]; // Get Object type
 
                         // build line for csv
-                        String newLine = $"{actionName},{user.Name},{operationName},{objectid},{(createdon.ToLocalTime())}";
+                        String newLine = $"{actionName},{user.Name},{operationName},{objectid.Name},{objecttype},{(createdon.ToLocalTime())}";
 
                         // append line to csv
                         csv.AppendLine(newLine);
