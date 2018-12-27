@@ -92,7 +92,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Class1.cs" />
-    <Compile Include="CRM\Entities.cs" />
+    <Compile Include="CRM\MyOrganizationCrmSdkTypes.cs" />
     <Compile Include="CRM\OptionSets.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

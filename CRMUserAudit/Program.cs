@@ -111,10 +111,10 @@ namespace CRMUserAudit
                     foreach (Entity audit in results.Entities)
                     {
                         OptionSetValue action = (OptionSetValue)audit["action"];  // Get Action value
-                        Audit_Action actionName = (Audit_Action)action.Value; // Get Action name from optionset using value
+                        AuditAction actionName = (AuditAction)action.Value; // Get Action name from optionset using value
                         EntityReference user = (EntityReference)audit["userid"]; // Get User entity reference from userid
                         OptionSetValue operation = (OptionSetValue)audit["operation"]; // Get Operation value
-                        Audit_Operation operationName = (Audit_Operation)operation.Value; // Get Operation name from optionset using value
+                        AuditOperation operationName = (AuditOperation)operation.Value; // Get Operation name from optionset using value
                         DateTime createdon = DateTime.Parse(audit["createdon"].ToString()); // get createdon date and cast from string to datetime
                         EntityReference objectid = (EntityReference)audit["objectid"]; // Get operation target entity reference from objectid
 
