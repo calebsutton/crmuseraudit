@@ -7,6 +7,8 @@ A command-line tool to export user audit data from Microsoft Dynamics Online
 Build with Microsoft Visual Studio 2017 or equivalent
 
 ## Requirements
+All requirements should be included as nuget packages in packages.config
+
 * CommandLineParser 2.3.0
 * Microsoft.CrmSdk.CoreAssemblies 9.0.2.4
 * Microsoft.CrmSdk.Deployment 9.0.2.4
