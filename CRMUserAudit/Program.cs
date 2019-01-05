@@ -57,8 +57,11 @@ namespace CRMUserAudit
             [Option("filteruser", Required = false, Default = null, HelpText = "Username to filter.  If not specified, will export all users except SYSTEM")]
             public string FilterUser { get; set; }
 
-            [Option("excludeobjects", Separator = ',', Default = null, Required = false, HelpText = "Logical names of objects to exclude from export.  Separated by commas.")]
+            [Option("excludeobjects", Separator = ',', SetName = "excludeobject", Default = null, Required = false, HelpText = "Logical names of objects to exclude from export.  Separated by commas.")]
             public IEnumerable<string> ExcludeObjects { get; set; }
+
+            [Option("includeobjects", Separator = ',', SetName = "includeobjects", Default = null, Required = false, HelpText = "Logical names of objects to include in export, excluding any that are not listed.  Separated by commas.")]
+            public IEnumerable<string> IncludeObjects { get; set; }
         }
 
         static void Main(string[] args)
@@ -110,7 +113,17 @@ namespace CRMUserAudit
                             query.Criteria.AddCondition("objecttypecode", ConditionOperator.NotEqual, objecttypecode);
                         }
                     }
-                    
+
+                    if (options.IncludeObjects.Any())
+                    {
+                        FilterExpression childFilter = query.Criteria.AddFilter(LogicalOperator.Or);
+                        // add filter for included objects
+                        foreach (object objecttypecode in options.IncludeObjects.ToArray())
+                        {
+                            childFilter.AddCondition("objecttypecode", ConditionOperator.Equal, objecttypecode);
+                        }
+                    }
+
                     // Filter by date using Days option, time period between now and X days ago           
                     query.Criteria.AddCondition( "createdon", ConditionOperator.GreaterEqual, (DateTime.Now).AddDays(options.Days));
 
